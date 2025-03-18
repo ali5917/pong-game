@@ -4,17 +4,21 @@
 using namespace std;
 
 // Global
-#define GAME_MENU 0
+#define GAME_START 0
 #define GAME_REGISTER 1
-#define GAME_LOBBY 2
+#define GAME_MENU 2
 #define GAME_PLAYING 3
 #define GAME_WIN 4
 #define GAME_LOSE 5
-#define GAME_WALLET -1 //
+#define GAME_WALLET 6 
+#define GAME_PROFILE 7
+
+
+int gameState = GAME_START;
 
 int aiScore = 0, playerScore = 0;
 int gameLevel = -1; // 1 = Karachi, 2 = New York, 3 = Rome
-int walletBalance = 250;
+int walletBalance = 1000;
 float ballSpeed;
 float aiSpeed;
 float playerSpeed;
@@ -39,17 +43,31 @@ int isBoy = -1;
 int isMature = -1;
 int isPak = -1;
 
-void saveUserData () {
-    ofstream thisFile ("userDetails.txt");
+// void saveUserData () {
+//     ofstream thisFile ("userDetails.txt");
     
-    if (thisFile.is_open()) {
-        thisFile << isBoy << endl;
-        thisFile << isMature << endl;
-        thisFile << isPak << endl;
-    }
+//     if (thisFile.is_open()) {
+//         thisFile << isBoy << endl;
+//         thisFile << isMature << endl;
+//         thisFile << isPak << endl;
+        
+//         thisFile.close();
+//     }
 
-    thisFile.close();
-}
+// }
+
+// void readUserData(bool &isBoy, bool &isMature, bool &isPak) {
+//     ifstream thisFile("userDetails.txt");
+
+//     if (thisFile.is_open()) {
+//         thisFile >> isBoy;
+//         thisFile >> isMature;
+//         thisFile >> isPak;
+        
+//         thisFile.close();
+//     }
+// }
+
 
 bool isEligible (int level, int &balance) {
     int arr[3] = {50, 100, 250};
@@ -229,34 +247,53 @@ class Game {
         Texture2D newYork;
         Texture2D rome;
         Texture2D paused;
-        Texture2D menu;
+        Texture2D start;
         Texture2D reg1;
         Texture2D reg2;
         Texture2D reg3;
-        Texture2D lobby;
+        Texture2D menu;
         Texture2D win;
         Texture2D lose;
         Texture2D wallet;
-        int gameState = GAME_LOBBY;
+
+        // Profiles
+        Texture2D pakboy;
+        Texture2D pakman;
+        Texture2D pakgirl;
+        Texture2D pakwoman;
+        Texture2D foreignboy;
+        Texture2D foreignman;
+        Texture2D foreigngirl;
+        Texture2D foreignwoman;
+
+
         Game () {
             ball = new Ball (GetScreenWidth() / 2, GetScreenHeight() / 2, 20.0, 10.0, 10.0);
             ai = new AiPaddle (10, GetScreenHeight() / 2 - 60, 25, 120, 8.5);
             player = new Paddle (GetScreenWidth() - 25 - 10, GetScreenHeight() / 2 - 60, 25, 120, 8.0); 
             
-            // newYork = LoadTexture("./assets/screens/new-york.png");
             lovelo = LoadFontEx("./assets/fonts/Lovelo Black.otf", 300, NULL, 0);
             karachi = LoadTexture("./assets/screens/karachi.png");
             newYork = LoadTexture("./assets/screens/newyork.png");
             rome = LoadTexture("./assets/screens/rome.png");
-            menu = LoadTexture("./assets/screens/menu.png");
+            start = LoadTexture("./assets/screens/start.png");
             paused = LoadTexture("./assets/screens/paused.png");
             reg1 = LoadTexture("./assets/screens/reg1.png");
             reg2 = LoadTexture("./assets/screens/reg2.png");
             reg3 = LoadTexture("./assets/screens/reg3.png");
-            lobby = LoadTexture("./assets/screens/lobby.png");
+            menu = LoadTexture("./assets/screens/menu.png");
             win = LoadTexture("./assets/screens/win.png");
             lose = LoadTexture("./assets/screens/lose.png");
             wallet = LoadTexture("./assets/screens/wallet.png");
+            
+            pakboy = LoadTexture("./assets/screens/profiles/pakboy.png");
+            pakman = LoadTexture("./assets/screens/profiles/pakman.png");
+            pakgirl = LoadTexture("./assets/screens/profiles/pakgirl.png");
+            pakwoman = LoadTexture("./assets/screens/profiles/pakwoman.png");
+            foreignboy = LoadTexture("./assets/screens/profiles/foreignboy.png");
+            foreignman = LoadTexture("./assets/screens/profiles/foreignman.png");
+            foreigngirl = LoadTexture("./assets/screens/profiles/foreigngirl.png");
+            foreignwoman = LoadTexture("./assets/screens/profiles/foreignwoman.png");
         }
 
         ~Game () {
@@ -272,18 +309,26 @@ class Game {
             UnloadTexture(newYork);
             UnloadTexture(rome);
             UnloadTexture(paused);
-            UnloadTexture(menu);
+            UnloadTexture(start);
             UnloadTexture(reg1);
             UnloadTexture(reg2);
             UnloadTexture(reg3);
-            UnloadTexture(lobby);
+            UnloadTexture(menu);
             UnloadTexture(win);
             UnloadTexture(lose);
             UnloadTexture(wallet);
+            UnloadTexture(pakboy);
+            UnloadTexture(pakman);
+            UnloadTexture(pakgirl);
+            UnloadTexture(pakwoman);
+            UnloadTexture(foreignboy);
+            UnloadTexture(foreignman);
+            UnloadTexture(foreigngirl);
+            UnloadTexture(foreignwoman);
         }
 
-        void drawMenu () {
-            DrawTexture(menu, 0, 0, WHITE);
+        void drawStart () {
+            DrawTexture(start, 0, 0, WHITE);
         }
         
         void drawReg() {
@@ -308,14 +353,14 @@ class Game {
                 if (IsKeyPressed(KEY_Y)) {
                     isPak = 1;
                 }
-                if (IsKeyPressed(KEY_N)) {
+                if (IsKeyPressed(KEY_X)) {
                     isPak = 0;
                 }
             }
         }
 
-        void drawLobby () {
-            DrawTexture(lobby, 0, 0, WHITE);
+        void drawMenu () {
+            DrawTexture(menu, 0, 0, WHITE);
             if (IsKeyPressed(KEY_K) && isEligible(1, walletBalance)) {
                 walletBalance -= 50;
                 gameLevel = 1;
@@ -331,6 +376,8 @@ class Game {
                 gameLevel = 3;
                 gameState = GAME_PLAYING;
             }
+            if (IsKeyPressed(KEY_W)) gameState = GAME_WALLET;
+            if (IsKeyPressed(KEY_P)) gameState = GAME_PROFILE;
         }
 
         void drawWin () {
@@ -349,22 +396,43 @@ class Game {
             }
         }
 
+        void drawProfile () {
+            if (isPak) {
+                if (isMature) {
+                    if (isBoy) {
+                        DrawTexture(pakman, 0, 0, WHITE);
+                    } else DrawTexture(pakwoman, 0, 0, WHITE);
+                } else if (isBoy) {
+                    DrawTexture(pakboy, 0, 0, WHITE);
+                } else DrawTexture(pakgirl, 0, 0, WHITE);
+            }  else if (isMature) {
+                if (isBoy) {
+                    DrawTexture(foreignman, 0, 0, WHITE);
+                } else DrawTexture(foreignwoman, 0, 0, WHITE);
+            } else if (isBoy) {
+                DrawTexture(foreignboy, 0, 0, WHITE);
+            } else DrawTexture(foreigngirl, 0, 0, WHITE);
+
+            if (IsKeyPressed(KEY_M)) gameState = GAME_MENU;
+
+        }
+
         void draw () {   
-            if (gameState == GAME_MENU) {
-                drawMenu();
+            if (gameState == GAME_START) {
+                drawStart();
                 if (IsKeyPressed(KEY_R)) gameState = 1;
             } 
             
             if (gameState == GAME_REGISTER) {
                 drawReg();
                 if (isBoy != -1 && isMature != -1 && isPak != -1) {
-                    saveUserData();
-                    gameState = GAME_PLAYING;
+                    // saveUserData();
+                    gameState = GAME_MENU;
                 }
             }
 
-            if (gameState == GAME_LOBBY) {
-                drawLobby();
+            if (gameState == GAME_MENU) {
+                drawMenu();
             }
 
             if (gameState == GAME_PLAYING) {
@@ -393,7 +461,7 @@ class Game {
 
                 } else if (gameLevel == 3) {
                     DrawTexture(rome, 0, 0, WHITE); 
-                    DrawTextEx(lovelo, "ROME", {screenWidth / 2 - 100, 20}, 80, 0, BLACK);
+                    DrawTextEx(lovelo, "ROME", {screenWidth / 2 - 120, 20}, 80, 0, BLACK);
                     DrawTextEx(lovelo, TextFormat("%i", aiScore), {screenWidth / 5 - 20, 20}, 80, 0, BLACK);
                     DrawTextEx(lovelo, TextFormat("%i", playerScore), {4 * screenWidth / 5 - 20, 20}, 80, 0, BLACK);
                     
@@ -414,26 +482,26 @@ class Game {
 
             if (gameState == GAME_WIN) {
                 drawWin();
+                playerScore = 0;
+                aiScore = 0;
                 if (IsKeyPressed(KEY_M)) gameState = GAME_MENU;
-                if (IsKeyPressed(KEY_R)) {
-                    playerScore = 0;
-                    aiScore = 0;
-                    gameState = GAME_PLAYING;
-                }
+                if (IsKeyPressed(KEY_R)) gameState = GAME_PLAYING;
             }
 
             if (gameState == GAME_LOSE) {
                 drawLose();
+                playerScore = 0;
+                aiScore = 0;
                 if (IsKeyPressed(KEY_M)) gameState = GAME_MENU;
-                if (IsKeyPressed(KEY_R)) {
-                    playerScore = 0;
-                    aiScore = 0;
-                    gameState = GAME_PLAYING;
-                }
+                if (IsKeyPressed(KEY_R)) gameState = GAME_PLAYING;
             }
 
             if (gameState == GAME_WALLET) {
                 drawWallet();
+            }
+
+            if (gameState == GAME_PROFILE) {
+                drawProfile();
             }
         }
 
@@ -484,13 +552,18 @@ int main () {
     while (WindowShouldClose() == false) {
         
         // Updating if not paused
-        if (IsKeyPressed(KEY_P)){
+        if (IsKeyPressed(KEY_P) && gameState == GAME_PLAYING){
             isPaused = !isPaused;
         }
 
         if (IsKeyPressed(KEY_R) && isPaused) {
             playerScore = 0;
             aiScore = 0;
+            isPaused = false;
+        }
+        
+        if (IsKeyPressed(KEY_M) && isPaused) {
+            gameState = GAME_MENU;
             isPaused = false;
         }
 
