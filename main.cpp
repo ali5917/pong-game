@@ -3,7 +3,7 @@
 #include <fstream>
 using namespace std;
 
-// Global
+// Global Variables and Constants
 #define GAME_START 0
 #define GAME_REGISTER 1
 #define GAME_MENU 2
@@ -12,7 +12,6 @@ using namespace std;
 #define GAME_LOSE 5
 #define GAME_WALLET 6 
 #define GAME_PROFILE 7
-
 
 int gameState = GAME_START;
 
@@ -31,10 +30,10 @@ Color ballColor;
 Color paddleColor;
 Color cBrown = {109, 65, 42, 255};
 Color cGreen = {81, 116, 95, 255};
-Color karachiBall = {247, 218, 129, 255};
+Color karachiBall = {60, 24, 24, 255};
 Color newYorkBall = {106, 101, 0, 255};
 Color romeBall = WHITE;
-Color karachiPaddle = {101, 0, 0, 255};
+Color karachiPaddle = {255, 174, 11, 255};
 Color newYorkPaddle = {81, 116, 95, 255};
 Color romePaddle = {199, 60, 0, 255};
 
