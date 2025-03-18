@@ -5,6 +5,8 @@ using namespace std;
 int cpuScore = 0, playerScore = 0;
 const int screenWidth = 1280;
 const int screenHeight = 800;
+Color cBrown = {109, 65, 42, 255};
+Color cGreen = {81, 116, 95, 255};
 
 class Ball {
     private:
@@ -88,7 +90,9 @@ class Paddle {
             speed(s) {}
 
         void draw () {
-            DrawRectangleRounded(Rectangle{x, y, width, height}, 0.8, 0, WHITE);
+            float borderThickness = 3.0f;
+            DrawRectangleRounded(Rectangle{x - borderThickness, y - borderThickness, width + 2 * borderThickness, height + 2 * borderThickness}, 0.8, 0, WHITE);
+            DrawRectangleRounded(Rectangle{x, y, width, height}, 0.8, 0, cGreen);
         }
 
         void update () {
@@ -151,7 +155,9 @@ class Game {
             ai = new CpuPaddle (10, GetScreenHeight() / 2 - 60, 25, 120, 8.5);
             player = new Paddle (GetScreenWidth() - 25 - 10, GetScreenHeight() / 2 - 60, 25, 120, 8.0); 
             
-            newYork = LoadTexture("./assets/screens/new-york.png");
+            // newYork = LoadTexture("./assets/screens/new-york.png");
+            newYork = LoadTexture("./assets/screens/temp1.png");
+
             paused = LoadTexture("./assets/screens/paused.png");
             lovelo = LoadFontEx("./assets/fonts/Lovelo Black.otf", 300, NULL, 0);
 
@@ -168,11 +174,11 @@ class Game {
 
         void draw () {      
             DrawTexture(newYork, 0, 0, WHITE);   
-            DrawLine(screenWidth / 2, 0, screenWidth / 2, screenHeight, DARKGRAY);
-            
-            DrawTextEx(lovelo, "Round 1", {screenWidth / 2 - 160, 20}, 80, 0, WHITE);
-            DrawTextEx(lovelo, TextFormat("%i", cpuScore), {screenWidth / 5 - 20, 20}, 80, 0, WHITE);
-            DrawTextEx(lovelo, TextFormat("%i", playerScore), {4 * screenWidth / 5 - 20, 20}, 80, 0, WHITE);
+            // DrawLine(screenWidth / 2, 0, screenWidth / 2, screenHeight, DARKGRAY);
+
+            DrawTextEx(lovelo, "NEW YORK", {screenWidth / 2 - 200, 20}, 80, 0, cBrown);
+            DrawTextEx(lovelo, TextFormat("%i", cpuScore), {screenWidth / 5 - 20, 20}, 80, 0, cBrown);
+            DrawTextEx(lovelo, TextFormat("%i", playerScore), {4 * screenWidth / 5 - 20, 20}, 80, 0, cBrown);
             
 
             ball->draw();
