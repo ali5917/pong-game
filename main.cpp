@@ -6,14 +6,18 @@ using namespace std;
 // Global
 #define GAME_MENU 0
 #define GAME_REGISTER 1
-#define GAME_LOBBY -1 //
+#define GAME_LOBBY 2
 #define GAME_PLAYING 3
 #define GAME_WIN 4
 #define GAME_LOSE 5
+#define GAME_WALLET -1 //
 
 int aiScore = 0, playerScore = 0;
 int gameLevel = -1; // 1 = Karachi, 2 = New York, 3 = Rome
 int walletBalance = 250;
+float ballSpeed;
+float aiSpeed;
+float playerSpeed;
 
 const int screenWidth = 1280;
 const int screenHeight = 800;
@@ -125,6 +129,14 @@ class Ball {
         void InvertSpeedX () {
             speedX *= -1;
         }
+
+        void setSpeedX (float s) {
+            speedX = s;
+        }
+
+        void setSpeedY (float s) {
+            speedY = s;
+        }
 };
 
 class Paddle {
@@ -187,6 +199,10 @@ class Paddle {
         float getHeight () {
             return height;
         }
+
+        void setSpeed (float s) {
+            speed = s;
+        }
 };
 
 class AiPaddle : public Paddle {
@@ -220,10 +236,10 @@ class Game {
         Texture2D lobby;
         Texture2D win;
         Texture2D lose;
-        int gameState = GAME_LOBBY;  //
-         
+        Texture2D wallet;
+        int gameState = GAME_LOBBY;
         Game () {
-            ball = new Ball (GetScreenWidth() / 2, GetScreenHeight() / 2, 20.0, 7.0, 10.0);
+            ball = new Ball (GetScreenWidth() / 2, GetScreenHeight() / 2, 20.0, 10.0, 10.0);
             ai = new AiPaddle (10, GetScreenHeight() / 2 - 60, 25, 120, 8.5);
             player = new Paddle (GetScreenWidth() - 25 - 10, GetScreenHeight() / 2 - 60, 25, 120, 8.0); 
             
@@ -240,6 +256,7 @@ class Game {
             lobby = LoadTexture("./assets/screens/lobby.png");
             win = LoadTexture("./assets/screens/win.png");
             lose = LoadTexture("./assets/screens/lose.png");
+            wallet = LoadTexture("./assets/screens/wallet.png");
         }
 
         ~Game () {
@@ -262,6 +279,7 @@ class Game {
             UnloadTexture(lobby);
             UnloadTexture(win);
             UnloadTexture(lose);
+            UnloadTexture(wallet);
         }
 
         void drawMenu () {
@@ -323,6 +341,14 @@ class Game {
             DrawTexture (lose, 0, 0, WHITE);
         }
 
+        void drawWallet () {
+            DrawTexture(wallet, 0, 0, WHITE);
+            DrawText(TextFormat("%i", walletBalance), screenWidth / 2 - 20, screenHeight / 2 - 50, 200, WHITE);
+            if (IsKeyPressed(KEY_M)) {
+                gameState = GAME_MENU;
+            }
+        }
+
         void draw () {   
             if (gameState == GAME_MENU) {
                 drawMenu();
@@ -348,16 +374,38 @@ class Game {
                     DrawTextEx(lovelo, "KARACHI", {screenWidth / 2 - 160, 20}, 80, 0, BLACK);
                     DrawTextEx(lovelo, TextFormat("%i", aiScore), {screenWidth / 5 - 20, 20}, 80, 0, BLACK);
                     DrawTextEx(lovelo, TextFormat("%i", playerScore), {4 * screenWidth / 5 - 20, 20}, 80, 0, BLACK);
+
                 } else if (gameLevel == 2) {
                     DrawTexture(newYork, 0, 0, WHITE); 
                     DrawTextEx(lovelo, "NEW YORK", {screenWidth / 2 - 200, 20}, 80, 0, BLACK);
                     DrawTextEx(lovelo, TextFormat("%i", aiScore), {screenWidth / 5 - 20, 20}, 80, 0, BLACK);
                     DrawTextEx(lovelo, TextFormat("%i", playerScore), {4 * screenWidth / 5 - 20, 20}, 80, 0, BLACK);
+                    
+                    // increasing speed of objects
+                    static bool speedSet = false;
+                    if (!speedSet) {
+                        ball->setSpeedX(14.0);
+                        ball->setSpeedY(14.0);
+                        ai->setSpeed(12);
+                        player->setSpeed(10);
+                        speedSet = true;
+                    }
+
                 } else if (gameLevel == 3) {
                     DrawTexture(rome, 0, 0, WHITE); 
                     DrawTextEx(lovelo, "ROME", {screenWidth / 2 - 100, 20}, 80, 0, BLACK);
                     DrawTextEx(lovelo, TextFormat("%i", aiScore), {screenWidth / 5 - 20, 20}, 80, 0, BLACK);
                     DrawTextEx(lovelo, TextFormat("%i", playerScore), {4 * screenWidth / 5 - 20, 20}, 80, 0, BLACK);
+                    
+                    // increasing speed of objects
+                    static bool speedSet = false;
+                    if (!speedSet) {
+                        ball->setSpeedX(16.0);
+                        ball->setSpeedY(16.0);
+                        ai->setSpeed(14);
+                        player->setSpeed(12);
+                        speedSet = true;
+                    }
                 }                
                 ball->draw();
                 player->draw();
@@ -382,6 +430,10 @@ class Game {
                     aiScore = 0;
                     gameState = GAME_PLAYING;
                 }
+            }
+
+            if (gameState == GAME_WALLET) {
+                drawWallet();
             }
         }
 
@@ -411,8 +463,8 @@ class Game {
                 if (aiScore == 5) gameState = GAME_LOSE;
 
             } else if (gameLevel == 3) {
-                if (playerScore == 5) gameState = GAME_WIN;
-                if (aiScore == 5) gameState = GAME_LOSE;
+                if (playerScore == 7) gameState = GAME_WIN;
+                if (aiScore == 7) gameState = GAME_LOSE;
             }
         }
 
@@ -423,7 +475,7 @@ class Game {
 
 int main () {
 
-    InitWindow(screenWidth, screenHeight, "OOP Game");
+    InitWindow(screenWidth, screenHeight, "PONG MAX");
     
     Game game;
     bool isPaused = false;
