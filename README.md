@@ -1,2 +1,2 @@
-# oop-project
-Game for OOP Project @ FAST NU Semester 2
+# pong-game
+A fun, interactive pong game with different levels made using raylib library 
